@@ -1,0 +1,8 @@
+name = "warrior-women-site-api"
+main = "index.js"
+compatibility_date = "2026-11-06"
+
+[vars]
+GITHUB_REPO = "masasecomm/wwcz"
+GITHUB_BRANCH = "main"
+ALLOWED_ORIGINS = "https://warriorwomen.co.za,https://www.warriorwomen.co.za,https://masasecomm.github.io"
