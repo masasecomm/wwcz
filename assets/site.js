@@ -3,6 +3,7 @@
   const navigation = document.querySelector(".navigation");
 
   renderSocialIcons();
+  initializeMagazineArticles();
   document.querySelectorAll(".video-card__play[data-video-id]").forEach((button) => {
     button.addEventListener("click", () => playFeaturedVideo(button));
   });
@@ -25,7 +26,7 @@
   }
 
   document.querySelectorAll("[data-current-year]").forEach((element) => {
-    element.textContent = String(new Date().getFullYear());
+    element.textContent = `2008 – ${new Date().getFullYear()}`;
   });
 
   const eventsList = document.querySelector("#events-list");
@@ -38,6 +39,134 @@
     contactForm.addEventListener("submit", (event) => submitContactForm(event, contactForm));
   }
 })();
+
+function initializeMagazineArticles() {
+  const carouselTrack = document.querySelector("[data-article-carousel-track]");
+  const articles = window.magazineArticles && window.magazineArticles.articles;
+  if (!carouselTrack) {
+    return;
+  }
+
+  if (!Array.isArray(articles) || articles.length === 0 || !articles.every(isValidMagazineArticle)) {
+    console.error("Magazine articles are missing or have an invalid format.");
+    showArticlesError(carouselTrack);
+    return;
+  }
+
+  carouselTrack.replaceChildren(...articles.map(createMagazineArticleSlide));
+  initializeArticleCarousel(carouselTrack);
+}
+
+function isValidMagazineArticle(article) {
+  return article
+    && typeof article.id === "string"
+    && /^[a-z0-9-]+$/.test(article.id)
+    && typeof article.title === "string"
+    && typeof article.author === "string"
+    && typeof article.description === "string"
+    && typeof article.imagePath === "string"
+    && typeof article.content === "string"
+    && typeof article.publishedAt === "string"
+    && /^\d{4}-\d{2}-\d{2}$/.test(article.publishedAt);
+}
+
+function showArticlesError(container) {
+  if (!container) {
+    return;
+  }
+
+  const message = document.createElement("p");
+  message.className = "articles-error";
+  message.textContent = "We couldn’t load the magazine stories. Please try again later.";
+  container.replaceChildren(message);
+}
+
+function createMagazineArticleSlide(article) {
+  const card = document.createElement("article");
+  card.className = "article-slider__card";
+
+  const imageLink = document.createElement("a");
+  imageLink.className = "article-slider__image";
+  imageLink.href = `articles/${article.id}.html`;
+  imageLink.setAttribute("aria-label", `Read ${article.title}`);
+  const image = document.createElement("img");
+  image.src = article.imagePath;
+  image.alt = article.title;
+  image.loading = "lazy";
+  image.decoding = "async";
+  if (article.imagePosition) {
+    image.style.objectPosition = article.imagePosition;
+  }
+  imageLink.append(image);
+
+  const copy = document.createElement("div");
+  copy.className = "article-slider__copy";
+  const author = document.createElement("span");
+  author.className = "article-slider__author";
+  author.textContent = article.author;
+  const date = document.createElement("time");
+  date.className = "article-slider__date";
+  date.dateTime = article.publishedAt;
+  date.textContent = new Intl.DateTimeFormat("en-ZA", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(new Date(`${article.publishedAt}T00:00:00`));
+  const title = document.createElement("h3");
+  const titleLink = document.createElement("a");
+  titleLink.className = "article-slider__title-link";
+  titleLink.href = `articles/${article.id}.html`;
+  titleLink.textContent = article.title;
+  title.append(titleLink);
+  const description = document.createElement("p");
+  description.textContent = article.description;
+  const readLink = document.createElement("a");
+  readLink.className = "article-slider__read";
+  readLink.href = `articles/${article.id}.html`;
+  readLink.append(document.createTextNode("Read the story "));
+  const arrow = document.createElement("span");
+  arrow.setAttribute("aria-hidden", "true");
+  arrow.textContent = "↗";
+  readLink.append(arrow);
+
+  copy.append(author, date, title, description, readLink);
+  card.append(imageLink, copy);
+  return card;
+}
+
+function initializeArticleCarousel(track) {
+  const previous = document.querySelector("[data-article-prev]");
+  const next = document.querySelector("[data-article-next]");
+  if (!previous || !next) {
+    return;
+  }
+
+  let index = 0;
+  const update = () => {
+    const slides = Array.from(track.children);
+    const visibleCount = window.matchMedia("(max-width: 560px)").matches
+      ? 1
+      : window.matchMedia("(max-width: 980px)").matches ? 2 : 3;
+    const maxIndex = Math.max(0, slides.length - visibleCount);
+    index = Math.min(index, maxIndex);
+    const gap = Number.parseFloat(window.getComputedStyle(track).columnGap) || 0;
+    const slideWidth = slides[0] ? slides[0].getBoundingClientRect().width : 0;
+    track.style.transform = `translateX(-${index * (slideWidth + gap)}px)`;
+    previous.disabled = index === 0;
+    next.disabled = index >= maxIndex;
+  };
+
+  previous.addEventListener("click", () => {
+    index = Math.max(0, index - 1);
+    update();
+  });
+  next.addEventListener("click", () => {
+    index += 1;
+    update();
+  });
+  window.addEventListener("resize", update);
+  update();
+}
 
 function renderSocialIcons() {
   const namespace = "http://www.w3.org/2000/svg";
@@ -53,14 +182,11 @@ function renderSocialIcons() {
     ],
     Facebook: [
       ["path", { class: "social-icon__facebook", d: "M13.7 21v-8.2h2.8l.4-3.2h-3.2v-2c0-.9.3-1.6 1.6-1.6H17V3.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.1 1.5-4.1 4.3v2.3H7.7v3.2h2.7V21z" }]
-    ],
-    LinkedIn: [
-      ["path", { class: "social-icon__linkedin", d: "M5.2 8.5A1.9 1.9 0 1 0 5.2 4.7a1.9 1.9 0 0 0 0 3.8ZM3.6 10h3.2v10.3H3.6zm5.2 0h3v1.4h.1c.4-.8 1.5-1.7 3.1-1.7 3.3 0 3.9 2.2 3.9 5v5.6h-3.2v-5c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7v5.1H8.8z" }]
     ]
   };
 
-  document.querySelectorAll(".social-links a[aria-label]").forEach((link) => {
-    const icon = icons[link.getAttribute("aria-label")];
+  document.querySelectorAll(".social-links a[aria-label], .social-audience__icon[aria-label]").forEach((link) => {
+    const icon = icons[link.dataset.socialIcon || link.getAttribute("aria-label")];
     if (!icon) {
       return;
     }
@@ -84,11 +210,23 @@ function playFeaturedVideo(button) {
     return;
   }
 
+  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  if (!["http:", "https:"].includes(window.location.protocol)) {
+    window.open(videoUrl, "_blank", "noopener,noreferrer");
+    return;
+  }
+
   const iframe = document.createElement("iframe");
-  iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+  const playerUrl = new URL(`https://www.youtube-nocookie.com/embed/${videoId}`);
+  playerUrl.searchParams.set("autoplay", "1");
+  playerUrl.searchParams.set("origin", window.location.origin);
+  playerUrl.searchParams.set("widget_referrer", window.location.href);
+  playerUrl.searchParams.set("playsinline", "1");
+  playerUrl.searchParams.set("rel", "0");
+  iframe.src = playerUrl.toString();
   iframe.title = button.dataset.videoTitle || "Warrior Women Prayer Movement YouTube video";
   iframe.loading = "eager";
-  iframe.referrerPolicy = "strict-origin-when-cross-origin";
+  iframe.referrerPolicy = "origin";
   iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
   iframe.allowFullscreen = true;
   button.replaceWith(iframe);
