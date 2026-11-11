@@ -357,11 +357,13 @@ async function submitContactForm(event, form) {
   }
 
   const formData = new FormData(form);
+  const formMessage = String(formData.get("message") || "").trim();
+  const messagePrefix = form.dataset.messagePrefix?.trim();
   const message = {
     name: String(formData.get("name") || "").trim(),
     email: String(formData.get("email") || "").trim(),
     phone: String(formData.get("phone") || "").trim(),
-    message: String(formData.get("message") || "").trim(),
+    message: messagePrefix ? `${messagePrefix}\n\n${formMessage}` : formMessage,
     website: String(formData.get("website") || "").trim(),
     submissionId: form.dataset.submissionId || crypto.randomUUID()
   };
