@@ -1,3 +1,4 @@
 window.WWPM_CONFIG = {
-  apiUrl: ""
+  apiUrl: "",
+  googleAppsScriptUrl: ""
 };

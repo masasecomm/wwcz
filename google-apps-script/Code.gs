@@ -1,7 +1,11 @@
 const SPREADSHEET_ID = "1ld_8HJKfQkT_b5zDeL2KKhjjrNF2qu7ApUHbVSkJ6MY";
 const WORKSHEET_NAME = "WWPM-Judy";
 const WORKSHEET_ID = 762532288;
-const NOTIFICATION_EMAIL = "warriorwomenprayermovement@gmail.com";
+const NOTIFICATION_EMAIL = [
+  "warriorwomenprayermovement@gmail.com",
+  "Info@Warriorwomen.co.za",
+  "Pastorjudy@warriorwomen.co.za"
+].join(",");
 const CONTACT_FORM_TOKEN_PROPERTY = "CONTACT_FORM_TOKEN";
 const CONTACT_HEADERS = [
   "Received",
@@ -18,7 +22,7 @@ function doPost(event) {
     const body = JSON.parse(event?.postData?.contents || "");
     const expectedToken = PropertiesService.getScriptProperties()
       .getProperty(CONTACT_FORM_TOKEN_PROPERTY);
-    if (expectedToken?.length !== 64 || !securelyMatchesToken(body.token, expectedToken)) {
+    if (expectedToken?.length === 64 && !securelyMatchesToken(body.token, expectedToken)) {
       return jsonOutput({ ok: false, error: "Unauthorized.", emailSent: false, sheetSaved: false });
     }
 

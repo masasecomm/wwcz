@@ -206,6 +206,38 @@ function renderSocialIcons() {
     });
     link.replaceChildren(svg);
   });
+
+  document.querySelectorAll(".social-links").forEach((container) => {
+    if (!container.querySelector('[data-social-icon="TikTok"]')) {
+      const tiktokLink = document.createElement("a");
+      tiktokLink.href = "https://www.tiktok.com/@pastor.judy.acher?_r=1&_t=ZS-9BKqNq6dMhA";
+      tiktokLink.target = "_blank";
+      tiktokLink.rel = "noopener noreferrer";
+      tiktokLink.setAttribute("aria-label", "TikTok");
+      tiktokLink.dataset.socialIcon = "TikTok";
+      tiktokLink.textContent = "TikTok";
+      container.append(tiktokLink);
+    }
+  });
+
+  document.querySelectorAll(".social-links a[data-social-icon]").forEach((link) => {
+    if (link.querySelector("svg")) {
+      return;
+    }
+    const icon = icons[link.dataset.socialIcon];
+    if (!icon) {
+      return;
+    }
+    const svg = document.createElementNS(namespace, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    icon.forEach(([tagName, attributes]) => {
+      const shape = document.createElementNS(namespace, tagName);
+      Object.entries(attributes).forEach(([name, value]) => shape.setAttribute(name, value));
+      svg.append(shape);
+    });
+    link.replaceChildren(svg);
+  });
 }
 
 function playFeaturedVideo(button) {
@@ -356,7 +388,8 @@ async function submitContactForm(event, form) {
   }
 
   const apiUrl = window.WWPM_CONFIG?.apiUrl?.trim().replace(/\/+$/, "");
-  if (!apiUrl) {
+  const googleAppsScriptUrl = window.WWPM_CONFIG?.googleAppsScriptUrl?.trim();
+  if (!apiUrl && !googleAppsScriptUrl) {
     setFormStatus(status, "The contact form is not connected yet. Please email warriorwomenprayermovement@gmail.com and we’ll be glad to help.", true);
     return;
   }
@@ -378,11 +411,17 @@ async function submitContactForm(event, form) {
   setFormStatus(status, "Sending your message with care…", false);
 
   try {
-    const response = await fetch(`${apiUrl}/api/contact`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(message)
-    });
+    const response = apiUrl
+      ? await fetch(`${apiUrl}/api/contact`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(message)
+        })
+      : await fetch(googleAppsScriptUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(message)
+        });
     let result;
     try {
       result = await response.json();

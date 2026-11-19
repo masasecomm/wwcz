@@ -618,8 +618,8 @@ textarea {
   justify-content: center;
   gap: 33px;
   padding: 26px 35px;
-  background: linear-gradient(135deg, var(--rose-soft) 0%, var(--rose-mid) 100%);
-  color: var(--plum);
+  background: #4a0717;
+  color: #fff;
   text-align: center;
 }
 
@@ -628,7 +628,7 @@ textarea {
 }
 
 .eyebrow--light {
-  color: var(--plum-mid);
+  color: #fff;
   font-family: var(--sans);
 }
 
@@ -1656,7 +1656,9 @@ textarea {
   position: relative;
   display: grid;
   justify-items: center;
+  background: #4a0717;
   padding: 99px 0 79px;
+  color: #fff;
   text-align: center;
 }
 
@@ -1668,13 +1670,14 @@ textarea {
 
 .invitation-section h2 {
   margin: 12px 0 7px;
+  color: #fff;
   font-size: 48px;
 }
 
 .invitation-section > p {
   max-width: 440px;
   margin: 10px auto 19px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 11px;
   line-height: 1.9;
 }
