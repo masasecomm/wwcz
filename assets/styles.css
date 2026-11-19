@@ -1711,7 +1711,7 @@ textarea {
 
 .partner-options {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -1723,7 +1723,7 @@ textarea {
 }
 
 .partner-option--bank {
-  grid-column: 1 / -1;
+  grid-column: auto;
 }
 
 .partner-option--mpesa {
@@ -1787,7 +1787,7 @@ textarea {
 
 .partner-details {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px 20px;
   margin: 0;
 }
@@ -3306,6 +3306,10 @@ textarea {
 }
 
 @media (min-width: 741px) and (max-width: 920px) {
+  .partner-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .site-header {
     width: calc(100% - 40px);
   }

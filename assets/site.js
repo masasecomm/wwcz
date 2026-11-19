@@ -387,10 +387,11 @@ async function submitContactForm(event, form) {
     return;
   }
 
+  const phpEndpoint = window.WWPM_CONFIG?.phpEndpoint?.trim();
   const apiUrl = window.WWPM_CONFIG?.apiUrl?.trim().replace(/\/+$/, "");
   const googleAppsScriptUrl = window.WWPM_CONFIG?.googleAppsScriptUrl?.trim();
-  if (!apiUrl && !googleAppsScriptUrl) {
-    setFormStatus(status, "The contact form is not connected yet. Please email warriorwomenprayermovement@gmail.com and we’ll be glad to help.", true);
+  if (!phpEndpoint && !apiUrl && !googleAppsScriptUrl) {
+    setFormStatus(status, "The contact form is not connected yet. Please email Info@Warriorwomen.co.za and we’ll be glad to help.", true);
     return;
   }
 
@@ -411,7 +412,13 @@ async function submitContactForm(event, form) {
   setFormStatus(status, "Sending your message with care…", false);
 
   try {
-    const response = apiUrl
+    const response = phpEndpoint
+      ? await fetch(phpEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(message)
+        })
+      : apiUrl
       ? await fetch(`${apiUrl}/api/contact`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -428,7 +435,7 @@ async function submitContactForm(event, form) {
     } catch {
       throw new Error(`The message could not be delivered (HTTP ${response.status}).`);
     }
-    if (!response.ok || result.ok !== true || result.emailSent !== true || result.sheetSaved !== true) {
+    if (!response.ok || result.ok !== true || result.emailSent !== true || (!phpEndpoint && result.sheetSaved !== true)) {
       throw new Error(result.error || `The message could not be sent (HTTP ${response.status}).`);
     }
 
@@ -436,7 +443,9 @@ async function submitContactForm(event, form) {
     delete form.dataset.submissionId;
     setFormStatus(
       status,
-      result.telegramNotified === false
+      phpEndpoint
+        ? "Your message has been emailed to the ministry team. Thank you for trusting us with it; we’ll be in touch."
+        : result.telegramNotified === false
         ? "Your message was emailed to the ministry and securely recorded. The Telegram notification could not be sent, but your message was received."
         : "Your message has been emailed to the ministry and securely recorded. Thank you for trusting us with it; we’ll be in touch.",
       false
@@ -447,8 +456,8 @@ async function submitContactForm(event, form) {
     setFormStatus(
       status,
       networkError
-        ? "We couldn’t reach the ministry right now. Please try again or email warriorwomenprayermovement@gmail.com."
-        : error.message || "We couldn’t send your message. Please email warriorwomenprayermovement@gmail.com.",
+        ? "We couldn’t reach the ministry right now. Please try again or email Info@Warriorwomen.co.za."
+        : error.message || "We couldn’t send your message. Please email Info@Warriorwomen.co.za.",
       true
     );
   } finally {
